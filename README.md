@@ -313,7 +313,7 @@ make test                # unit tests only
 make test-integration    # full integration suite (needs Postgres)
 ```
 
-Integration tests exercise real Postgres with RLS enforced. Per project convention the database is never mocked — no sqlmock, no mock framework in the repo — so a passing suite means migrations and RLS work end-to-end.
+Integration tests exercise real Postgres with RLS enforced. Per project convention the database is never mocked — no sqlmock, no mock framework in the repo — so a passing suite means migrations and RLS work end-to-end. `make test-integration` expects a Postgres reachable at `DATABASE_URL` (see [`CONTRIBUTING.md`](CONTRIBUTING.md) for the local setup).
 
 ---
 
