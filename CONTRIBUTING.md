@@ -14,8 +14,11 @@ cd velox
 # Start Postgres
 docker compose up -d postgres
 
+# Export the local DB URL once so migrations and integration tests can reach Postgres
+export DATABASE_URL="postgres://velox:velox@localhost:5432/velox?sslmode=disable"
+
 # Run migrations
-DATABASE_URL="postgres://velox:velox@localhost:5432/velox?sslmode=disable" go run ./cmd/velox migrate
+go run ./cmd/velox migrate
 
 # Run tests
 go test ./... -short -count=1          # unit tests
