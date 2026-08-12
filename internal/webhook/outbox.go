@@ -92,7 +92,9 @@ func outboxBackoff(attempt int) time.Duration {
 
 // jitterDown subtracts a random fraction of d, bounded by outboxBackoffJitter.
 // Only ever shortens, so a caller reasoning about the worst-case ramp can keep
-// reading the table above as the upper bound.
+// reading the table above as the upper bound. math/rand is deliberate: this is
+// load-spreading, not a security boundary, and crypto/rand would add a syscall
+// per retry for no benefit.
 func jitterDown(d time.Duration) time.Duration {
 	if d <= 0 {
 		return d
