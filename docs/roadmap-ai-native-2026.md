@@ -4,7 +4,7 @@
 > sizing, and sequencing for the AI-native primitives (LLM provider cost-table
 > ingestion, embeddable cost dashboard, commits + draw-down, price-book
 > versioning) — now lives in the private planning repo
-> **`sagarsuperuser/velox-ops`**. Per Velox's public/private split, the public
+> **`getvelox/velox-ops`**. Per Velox's public/private split, the public
 > repo carries consumer docs + design RFCs; strategy, marketing, and roadmap
 > planning live in `velox-ops`.
 >
