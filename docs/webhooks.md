@@ -9,7 +9,9 @@ Endpoints are managed at `POST/GET/PATCH/DELETE /v1/webhook-endpoints/endpoints`
 **Webhooks**. Event names are validated at create/update against the
 catalog below — subscribing to a name Velox never emits is a 422, not
 silence. `*` subscribes to everything; `invoice.*`-style prefix wildcards
-work too.
+work too. Wildcards are matched against the catalog at delivery time, so a
+new event type that matches an existing subscription starts delivering
+without any endpoint change.
 
 ## Delivery envelope
 
