@@ -11,6 +11,7 @@ We commit to:
 | Stage | Target |
 |---|---|
 | Acknowledge receipt | within 2 business days |
+| First substantive response | within 10 business days |
 | Initial triage + severity assessment | within 5 business days |
 | Patch landed in main | within 30 days for high/critical, 90 days for medium, best-effort for low |
 | Public disclosure (with credit) | after a fixed release is available, coordinated with the reporter |
