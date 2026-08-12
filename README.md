@@ -328,3 +328,5 @@ Running AI inference, a vector DB, or usage-heavy SaaS, and Stripe Billing is st
 ## License
 
 [MIT](LICENSE)
+
+<!-- argus e2e test Tue Aug 11 17:45:35 PDT 2026 claude anthropic 1DE38C37-D15A-4E7C-82CB-EFD2A8C4CFAF -->
