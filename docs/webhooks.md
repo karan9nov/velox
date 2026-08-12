@@ -126,6 +126,11 @@ manually (`POST /v1/webhook-endpoints/events/{id}/replay`).
 - **Delivery is at-least-once.** Dedupe on the envelope `id`.
 - **Ordering is not guaranteed** across events. Don't infer state from
   arrival order; read the payload (or re-fetch the resource).
+- **Retries are jittered.** Each step of the ladder is shortened by a
+  random amount up to 20%. An endpoint going down fails every pending
+  event at once, which would otherwise keep their retries aligned for the
+  whole ramp and return them as a burst; jitter spreads them. The
+  published intervals are the ceiling, never exceeded.
 - **Recovery from a receiver outage:** the retry ladder covers ~26.5h per
   event on its own. Beyond that, the dashboard's event log supports
   per-event replay. (A filterable programmatic events API for bulk

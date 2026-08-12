@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"time"
 
 	"github.com/sagarsuperuser/velox/internal/platform/postgres"
@@ -53,9 +54,17 @@ func outboxClaimLease(batchSize int) time.Duration {
 	return time.Duration(batchSize)*outboxPerRowBudget + outboxClaimLeaseMarginSecs*time.Second
 }
 
+// outboxBackoffJitter is the fraction of a ramp step shaved off at random.
+// Rows that fail together — an endpoint going down takes every pending row
+// with it — otherwise share an attempt count, so their retries stay aligned
+// for the whole ~72h ramp and hit the endpoint as a burst each time.
+const outboxBackoffJitter = 0.2
+
 // outboxBackoff returns the delay before the next attempt given the current
 // attempt count (1 = after the first failure). Ramp: 1s, 5s, 30s, 2m, 5m,
 // 15m, 30m, 1h, 2h, 4h, 8h, 12h, 12h, 12h, 12h — ~72h total over 15 tries.
+// Each step is jittered down by up to outboxBackoffJitter; the ramp is a
+// ceiling, so the total stays at or under ~72h and never exceeds it.
 func outboxBackoff(attempt int) time.Duration {
 	ramp := []time.Duration{
 		1 * time.Second,
@@ -78,7 +87,19 @@ func outboxBackoff(attempt int) time.Duration {
 	if idx >= len(ramp) {
 		idx = len(ramp) - 1
 	}
-	return ramp[idx]
+	return jitterDown(ramp[idx])
+}
+
+// jitterDown subtracts a random fraction of d, bounded by outboxBackoffJitter.
+// Only ever shortens, so a caller reasoning about the worst-case ramp can keep
+// reading the table above as the upper bound. math/rand is deliberate: this is
+// load-spreading, not a security boundary, and crypto/rand would add a syscall
+// per retry for no benefit.
+func jitterDown(d time.Duration) time.Duration {
+	if d <= 0 {
+		return d
+	}
+	return d - time.Duration(rand.Float64()*outboxBackoffJitter*float64(d))
 }
 
 // OutboxStore persists webhook-event emission intents.
