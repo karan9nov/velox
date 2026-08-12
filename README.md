@@ -154,7 +154,7 @@ Stating these loudly so the wrong customers self-select out:
 Prereqs: Docker, Go 1.25+, Node 20+ (dashboard), `jq` (demo script).
 
 ```bash
-git clone https://github.com/sagarsuperuser/velox.git && cd velox
+git clone https://github.com/getvelox/velox.git && cd velox
 
 # Backend — Postgres + bootstrap demo tenant + operator user + API keys
 cp .env.example .env # make dev reads it; the defaults work for local dev as-is
