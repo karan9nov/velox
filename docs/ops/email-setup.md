@@ -213,6 +213,12 @@ in plaintext.
 | Firewall blocks 587 outbound | Connect timeout | Switch to port 465 + `SMTP_TLS=implicit` |
 | ESP rate-limited the relay | `421 throttled` | Check ESP dashboard; lower outbox dispatcher concurrency |
 
+Retries are jittered: each step of the outbox backoff ramp is shortened by a
+random amount up to 20%. An ESP outage fails every queued email at once, and
+without jitter they stay on a shared schedule for the whole ~72h ramp and
+return as a burst each cycle — precisely when the relay is least able to take
+it. The published intervals remain the ceiling.
+
 ## Verifying your configuration
 
 After setting env vars, restart Velox and run a test send:
