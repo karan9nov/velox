@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"time"
 
 	"github.com/sagarsuperuser/velox/internal/platform/clock"
@@ -122,9 +123,17 @@ var ErrPayloadDecode = errors.New("email outbox: payload decode failed")
 // — deliberately not sent; nothing failed, nothing was delivered.
 var ErrEmailObsolete = errors.New("email outbox: obsolete — invoice settled before delivery")
 
+// outboxBackoffJitter is the fraction of a ramp step shaved off at random.
+// Mirrors internal/webhook/outbox.go: an SMTP outage fails every pending row
+// at once, leaving them on a shared attempt count and therefore a shared
+// schedule for the whole ramp — each retry then arrives as one burst.
+const outboxBackoffJitter = 0.2
+
 // outboxBackoff returns the delay before the next attempt given the current
 // attempt count (1 = after the first failure). Ramp: 1s, 5s, 30s, 2m, 5m,
 // 15m, 30m, 1h, 2h, 4h, 8h, 12h, 12h, 12h, 12h — ~72h total over 15 tries.
+// Each step is jittered down by up to outboxBackoffJitter, so the ramp above
+// is a ceiling rather than an exact schedule.
 func outboxBackoff(attempt int) time.Duration {
 	ramp := []time.Duration{
 		1 * time.Second,
@@ -147,7 +156,17 @@ func outboxBackoff(attempt int) time.Duration {
 	if idx >= len(ramp) {
 		idx = len(ramp) - 1
 	}
-	return ramp[idx]
+	return jitterDown(ramp[idx])
+}
+
+// jitterDown subtracts a random fraction of d, bounded by outboxBackoffJitter.
+// Only ever shortens, so the worst-case recovery window stays what the ramp
+// table says it is.
+func jitterDown(d time.Duration) time.Duration {
+	if d <= 0 {
+		return d
+	}
+	return d - time.Duration(rand.Float64()*outboxBackoffJitter*float64(d))
 }
 
 // OutboxStore persists email-emission intents.
