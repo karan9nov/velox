@@ -6,7 +6,7 @@ The full text — including the standards we hold ourselves to, the enforcement 
 
 ## Reporting
 
-To report a Code of Conduct concern, email **conduct@velox.dev**. Reports are read by the project maintainer only and are not made public.
+To report a Code of Conduct concern, email **conduct@velox.dev**. Reports are acknowledged within 2 business days. Reports are read by the project maintainer only and are not made public.
 
 If your concern overlaps with a security vulnerability, see [`SECURITY.md`](SECURITY.md) for the disclosure policy — we'll route appropriately.
 
