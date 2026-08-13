@@ -31,6 +31,11 @@ type DispatchLock interface {
 // query every 2s when only one drain worker is actually needed — less churn
 // on the connection pool and on webhook_outbox's index scan. Nil Locker
 // disables gating (single-replica / test mode).
+// maxDispatchBatchSize caps the rows one tick may claim. Chosen so the derived
+// lease stays inside the ADR-072 invariant chain at the default per-row budget:
+// 100×10s = 1000s of BatchTimeout, comfortably under outboxClaimLease(100).
+const maxDispatchBatchSize = 100
+
 type DispatchLocker interface {
 	TryDispatcherLock(ctx context.Context) (DispatchLock, bool, error)
 }
@@ -55,6 +60,15 @@ func NewDispatcher(outbox *OutboxStore, svc *Service, cfg DispatcherConfig) *Dis
 	}
 	if cfg.BatchSize <= 0 {
 		cfg.BatchSize = 25
+	}
+	if cfg.BatchSize > maxDispatchBatchSize {
+		// Only the lower bound was guarded. BatchSize also drives the
+		// derived BatchTimeout and the claim lease, so an oversized value
+		// silently stretches how long a failed drain keeps rows leased —
+		// BatchSize×outboxPerRowBudget with BatchSize=500 is well over an
+		// hour of invisibility. Clamp rather than reject: a bad config
+		// value should degrade throughput, not stop delivery entirely.
+		cfg.BatchSize = maxDispatchBatchSize
 	}
 	if cfg.BatchTimeout <= 0 {
 		// Invariant chain (ADR-072): BatchSize×outboxPerRowBudget ≤
