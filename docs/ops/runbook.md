@@ -184,6 +184,11 @@ customers report they expected retries but no email arrived.
 
 **Diagnose**:
 ```sql
+**Dunning pauses on card expiry.** If a customer's card expires mid-dunning,
+the retry schedule holds rather than burning attempts against a card that
+cannot succeed. Resume by updating the payment method; the remaining attempts
+carry over.
+
 -- Check recent payment retry outcomes
 SELECT outcome, count(*) FROM (
   SELECT
