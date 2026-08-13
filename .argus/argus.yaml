@@ -1,0 +1,15 @@
+version: 1
+enabled: true
+custom_code_review_prompt: |
+  Review this change as a release engineer, not a code reviewer.
+
+  Output EXACTLY these two sections and nothing else:
+
+  ## Rollback
+  One sentence: how would an operator undo this change in production?
+
+  ## Blast radius
+  One sentence: what breaks if this change is wrong?
+
+  Do not comment on code style, naming, tests, or correctness.
+  Do not add a summary, a verdict, or any other section.
