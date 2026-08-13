@@ -184,6 +184,13 @@ customers report they expected retries but no email arrived.
 
 **Diagnose**:
 ```sql
+**Webhook outbox drain is slow or rows look stuck.** The dispatcher claims at
+most 100 rows per tick; a larger configured batch size is clamped to that. The
+claim lease scales with the batch, so a backlog drains in several ticks rather
+than one long lease — rows that look "stuck" for a few seconds are usually
+leased, not lost. Check `webhook_outbox` for `status='pending'` with a
+`next_attempt_at` in the past before assuming a failure.
+
 -- Check recent payment retry outcomes
 SELECT outcome, count(*) FROM (
   SELECT
