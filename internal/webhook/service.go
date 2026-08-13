@@ -424,6 +424,12 @@ func (s *Service) RotateSecret(ctx context.Context, tenantID, endpointID string)
 
 	ep, err := s.store.RotateEndpointSecret(ctx, tenantID, endpointID, newSecret, SecretRotationGracePeriod)
 	if err != nil {
+		// The plaintext secret exists only in this frame — if the store call
+		// failed it was never persisted, so scrub it before returning rather
+		// than leaving it for the GC to reclaim whenever it gets round to it.
+		for i := range secretBytes {
+			secretBytes[i] = 0
+		}
 		return RotateSecretResult{}, err
 	}
 	return RotateSecretResult{
