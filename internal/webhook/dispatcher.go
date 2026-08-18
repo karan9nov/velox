@@ -54,7 +54,7 @@ func NewDispatcher(outbox *OutboxStore, svc *Service, cfg DispatcherConfig) *Dis
 		cfg.Interval = 2 * time.Second
 	}
 	if cfg.BatchSize <= 0 {
-		cfg.BatchSize = 25
+		cfg.BatchSize = 100
 	}
 	if cfg.BatchTimeout <= 0 {
 		// Invariant chain (ADR-072): BatchSize×outboxPerRowBudget ≤
